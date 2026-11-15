@@ -1,0 +1,8 @@
+# Source of truth for C, Objective-C and Objective-C++ formatting.
+# Run: clang-format -i <files>   (version 23.1.5, the same as CI)
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 100
+ObjCBlockIndentWidth: 4
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never

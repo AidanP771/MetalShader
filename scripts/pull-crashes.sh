@@ -30,10 +30,16 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+# $days is pasted into the remote command line, so only allow whole numbers.
+case "$days" in
+'' | *[!0-9]*) mm_die "--days must be a whole number of days, got: $days" ;;
+esac
+
 dest="$REPO_DIR/reports/crashes/$(mm_timestamp)"
 mkdir -p "$dest"
 
 # The remote side lists matching files and streams them back as one tar.
+# shellcheck disable=SC2029 # $days expands here on purpose; it is checked above.
 ssh "$host" "bash -s -- $days" <<'REMOTE' | tar -xzf - -C "$dest"
 set -euo pipefail
 cd "$HOME/Library/Logs/DiagnosticReports"

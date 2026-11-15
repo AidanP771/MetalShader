@@ -2,11 +2,11 @@
 # mm-update.command - Double-click on the test Mac to install the latest dev
 # build of MetalMix without the dev Mac being online.
 #
-# Downloads the "dev-latest" pre-release from GitHub (published by CI from M5;
-# until then, use scripts/deploy.sh from the dev Mac), backs up the saves, then
-# installs it into the MetalMix folder. Never touches the game itself.
+# Downloads the "dev-latest" pre-release from GitHub (published by
+# .github/workflows/ci.yml, packed by package-build.sh), backs up the saves,
+# then installs it into the MetalMix folder. Never touches the game itself.
 #
-# Setup: set MM_RELEASE_REPO to "owner/metalmix", or edit the default below.
+# Setup: set MM_RELEASE_REPO to "owner/repo", or edit the default below.
 
 cd "$(dirname "$0")" || exit 1
 # shellcheck source=SCRIPTDIR/lib/common.sh

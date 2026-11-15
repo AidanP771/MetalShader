@@ -1,1 +1,8 @@
 .DS_Store
+
+# Build output (cmake presets)
+/build/
+
+# Crash reports and logs pulled from the test Mac. They contain usernames and
+# paths, so they never go in this repo (docs/dev-setup.md).
+/reports/

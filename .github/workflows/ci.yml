@@ -1,0 +1,131 @@
+# CI for MetalMix. See docs/dev-setup.md ("Async testing through git").
+#
+# Every push and pull request:
+#   checks  - clang-format (pinned), shellcheck and bash syntax on scripts/
+#   build   - dev (arm64) and release (universal) presets, architecture check
+# Pushes to dev, or a manual run with "publish" ticked:
+#   publish - replaces the rolling dev-latest pre-release with the new
+#             metalmix-dev.tar.gz, which mm-update.command installs on the
+#             test Mac.
+
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish this build as the dev-latest pre-release"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CLANG_FORMAT_VERSION: "23.1.5" # keep in step with CLAUDE.md and docs/dev-setup.md
+
+jobs:
+  checks:
+    name: Format and script checks
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install clang-format ${{ env.CLANG_FORMAT_VERSION }} and shellcheck
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet "clang-format==$CLANG_FORMAT_VERSION"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+          command -v shellcheck || brew install shellcheck
+
+      - name: clang-format
+        run: |
+          clang-format --version
+          git ls-files '*.c' '*.h' '*.m' '*.mm' '*.cpp' '*.metal' \
+            | xargs clang-format --dry-run --Werror
+
+      - name: shellcheck
+        run: shellcheck scripts/*.sh scripts/*.command scripts/lib/*.sh
+
+      - name: bash syntax
+        run: for f in scripts/*.sh scripts/*.command scripts/lib/*.sh; do bash -n "$f"; done
+
+  build:
+    name: Build (${{ matrix.preset }})
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - preset: dev
+            archs: "arm64"
+          - preset: release
+            archs: "x86_64 arm64"
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Ninja
+        run: command -v ninja || brew install ninja
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }}
+
+      - name: Check architectures and signatures
+        run: |
+          dir=build/${{ matrix.preset }}
+          for f in "$dir/loader/mmloader.dylib" "$dir/core/mmcore.dylib"; do
+            got=$(lipo -archs "$f")
+            echo "$f: $got"
+            [ "$got" = "${{ matrix.archs }}" ] || { echo "Expected ${{ matrix.archs }}"; exit 1; }
+            codesign --verify --strict "$f"
+          done
+          codesign --verify --strict "$dir/testhost/testhost.app"
+
+      - name: Package for the test Mac
+        if: matrix.preset == 'dev'
+        run: scripts/package-build.sh build/dev metalmix-dev.tar.gz
+
+      - name: Upload package
+        if: matrix.preset == 'dev'
+        uses: actions/upload-artifact@v5
+        with:
+          name: metalmix-dev
+          path: metalmix-dev.tar.gz
+          if-no-files-found: error
+
+  publish:
+    name: Publish dev-latest
+    needs: [checks, build]
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+      (github.event_name == 'workflow_dispatch' && inputs.publish)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: metalmix-dev
+
+      - name: Replace the dev-latest pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          short_sha="${GITHUB_SHA::7}"
+          gh release delete dev-latest --yes --cleanup-tag || true
+          gh release create dev-latest metalmix-dev.tar.gz \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "Dev build $short_sha" \
+            --notes "Rolling dev build from ${GITHUB_REF_NAME} at ${short_sha}. Install on the test Mac with mm-update.command. Not for players."

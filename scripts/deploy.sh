@@ -49,23 +49,11 @@ if [ "$build" -eq 1 ]; then
     cmake --build --preset dev
 fi
 
-for required in "$BUILD_DIR/core/mmcore.dylib" "$BUILD_DIR/tools/mmctl/mmctl"; do
-    [ -f "$required" ] || mm_die "Missing $required. Build first."
-done
-
-# Stage exactly the files the test Mac should get.
-stage=$(mktemp -d)
-trap 'rm -rf "$stage"' EXIT
-mkdir -p "$stage/core" "$stage/bin" "$stage/shaders" "$stage/presets"
-cp "$BUILD_DIR/core/mmcore.dylib" "$stage/core/"
-cp "$BUILD_DIR/tools/mmctl/mmctl" "$stage/bin/"
-cp -R "$REPO_DIR/shaders/bundled" "$REPO_DIR/shaders/include" "$stage/shaders/"
-cp -R "$REPO_DIR/presets/bundled" "$stage/presets/"
-git -C "$REPO_DIR" rev-parse --short HEAD >"$stage/core/build-commit.txt" 2>/dev/null || true
-
-archive="$stage.tgz"
-tar -czf "$archive" -C "$stage" .
-trap 'rm -rf "$stage" "$archive"' EXIT
+# Same archive CI publishes, so deploy.sh and mm-update.command install alike.
+archive_dir=$(mktemp -d)
+trap 'rm -rf "$archive_dir"' EXIT
+archive="$archive_dir/metalmix-dev.tar.gz"
+"$SCRIPT_DIR/package-build.sh" "$BUILD_DIR" "$archive"
 
 mm_info "Copying to $host"
 scp -q "$archive" "$host:/tmp/metalmix-deploy.tgz"

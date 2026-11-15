@@ -24,6 +24,13 @@ cmake --build --preset dev
 The build sets the deployment target to macOS 15.0 so everything runs on the
 test Mac. Do not use newer APIs without an availability check.
 
+**Keep the checkout out of iCloud Drive.** If "Desktop & Documents Folders" is
+on in iCloud settings, macOS stamps Finder information onto every new `.app`
+folder under `~/Documents`. The build clears it before signing, so the test
+host still builds and runs, but `codesign --verify` on `testhost.app` fails
+afterwards and iCloud uploads the whole `build/` folder. A folder such as
+`~/Developer/metalmix` avoids both.
+
 ### Try it on the test host
 
 ```sh
@@ -89,9 +96,21 @@ user's own shaders and presets.
 
 When you are not both online:
 
-- **Builds:** from M5, CI publishes a rolling `dev-latest` pre-release.
+- **Builds:** CI (`.github/workflows/ci.yml`) builds every push and pull
+  request. A push to `dev` also replaces the rolling `dev-latest` pre-release
+  with a fresh `metalmix-dev.tar.gz`. To publish from any other branch, open
+  the repo's Actions tab, pick **CI**, choose **Run workflow**, select the
+  branch and tick **Publish**. Or from the dev Mac:
+
+  ```sh
+  gh workflow run ci.yml --ref main -f publish=true
+  ```
+
   `mm-update.command` on the test Mac downloads and installs it (after backing
-  up saves). Set `MM_RELEASE_REPO` to `owner/metalmix` first.
+  up saves). Set `MM_RELEASE_REPO` to `owner/repo` first, for example
+  `AidanP771/MetalShader`. The archive is made by `scripts/package-build.sh`,
+  the same script `deploy.sh` uses, so both routes install identical files.
+  The download uses plain `curl`, so it only works while the repo is public.
 - **Reports:** create a private `metalmix-testbench` repo. On the test Mac,
   clone it to `~/metalmix-testbench` using a deploy key with write access to
   that repo only. After testing, `mm-report.command` collects logs, screenshots
