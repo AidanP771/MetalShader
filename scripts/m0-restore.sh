@@ -59,7 +59,9 @@ $(find "$MM_SUPPORT_DIR/backups/game" -mindepth 1 -maxdepth 1 -type d -not -name
 EOF
 fi
 
-[ -n "$backup_dir" ] && [ -d "$backup_dir" ] || mm_die "No backup found for $app."
+[ -n "$backup_dir" ] && [ -d "$backup_dir" ] ||
+    mm_die "No MetalMix backup found for $app. m0-resign.sh makes one before it changes" \
+        "anything, so it has not changed this copy of the game. Nothing was changed."
 
 executable_name=$(cat "$backup_dir/executable-name.txt")
 executable="$app/Contents/MacOS/$executable_name"

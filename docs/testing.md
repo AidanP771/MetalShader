@@ -81,6 +81,29 @@ open build/dev/testhost/testhost.app
 | Did `m0-restore.sh` verify? | |
 | Pass or fail | |
 
+**Game not in Applications?** The scripts look for `/Applications/The Sims 4.app`.
+If the game is somewhere else, for example on an external drive, set the path
+first, in the same Terminal window as every script you run:
+
+```sh
+export MM_GAME_APP="/Volumes/sims/Electronic Arts/The Sims 4.app"
+```
+
+Do not use `--app` for the real game: it treats the app as a practice copy and
+skips the save backup.
+
+**"The game is already signed ad hoc"?** Something re-signed the game before
+MetalMix did, often a guide's fix for "app is damaged" errors. `m0-resign.sh`
+stops without changing anything, and `m0-restore.sh` has nothing to restore.
+Check how it is signed now:
+
+```sh
+codesign -dvvv --entitlements - "$MM_GAME_APP" 2>&1 | grep -E "Authority|Signature|flags|disable-library-validation"
+```
+
+Use Repair on The Sims 4 in the EA app to put EA's signature back, then run
+`m0-resign.sh` again.
+
 If M0 fails, the fallback is a launcher that starts the game executable with
 `DYLD_INSERT_LIBRARIES` (see Risks in `architecture.md`).
 

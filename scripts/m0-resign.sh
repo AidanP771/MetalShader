@@ -81,8 +81,10 @@ fi
 # the game.)
 current_signature=$(codesign -dv "$app" 2>&1 || true)
 if [ "$app" = "$MM_GAME_APP" ] && printf '%s' "$current_signature" | grep -q 'Signature=adhoc'; then
-    mm_die "The game is already signed ad hoc, so it has probably been re-signed before." \
-        "Run scripts/m0-restore.sh first, so the backup is of the original."
+    mm_die "The game is already signed ad hoc, so something re-signed it before. If" \
+        "m0-resign.sh did that, run m0-restore.sh. If not (for example a guide or mod" \
+        "tool did), use Repair on The Sims 4 in the EA app to put EA's signature back," \
+        "then run this again. Nothing was changed."
 fi
 
 if [ ! -w "$app/Contents/MacOS" ]; then
