@@ -1,0 +1,19 @@
+{
+  "formatVersion": 1,
+  "mode": "beginner",
+  "activePreset": "bundled/natural-boost.mmpreset",
+  "effectsEnabled": true,
+  "hotkeys": {
+    "toggleOverlay": "TBD: check against Sims 4 bindings",
+    "toggleEffects": "TBD",
+    "screenshot": "TBD"
+  },
+  "depth": {
+    "picksByResolution": {},
+    "reversedZ": "auto",
+    "farPlane": 1000.0,
+    "forceStore": false
+  },
+  "perfBudgetMs": 2.0,
+  "logLevel": "info"
+}

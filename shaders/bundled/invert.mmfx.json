@@ -1,0 +1,20 @@
+{
+  "formatVersion": 1,
+  "name": "Invert",
+  "description": "Turns the image into a negative. A pipeline test, not a look.",
+  "source": "invert.metal",
+  "passes": [
+    { "fragment": "mm_invert", "target": "output" }
+  ],
+  "parameters": [
+    {
+      "name": "strength",
+      "type": "float",
+      "label": "Strength",
+      "min": 0.0,
+      "max": 1.0,
+      "default": 1.0,
+      "beginner": true
+    }
+  ]
+}

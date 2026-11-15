@@ -1,0 +1,13 @@
+// @name   Warm Fade
+// @param  float warmth  0.0 1.0 0.3  "Warmth"
+// @param  float fade    0.0 1.0 0.2  "Fade"
+//
+// Example Mix snippet (format draft, implemented in M4b). MetalMix wraps this
+// function in a full fragment shader, turns each @param line into a slider,
+// and hot reloads the file when it is saved in shaders/user/.
+
+float4 apply(float2 uv, float4 color, MixContext ctx) {
+    color.rgb += float3(0.06, 0.02, -0.04) * warmth;
+    color.rgb = mix(color.rgb, float3(0.5), fade * 0.3);
+    return color;
+}

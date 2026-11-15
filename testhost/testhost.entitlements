@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Intentionally empty: the hardened test host keeps library validation on,
+     like an unpatched game. scripts/m0-resign.sh adds the entitlements
+     MetalMix needs, exactly as it does for the real game. -->
+<plist version="1.0">
+<dict/>
+</plist>
