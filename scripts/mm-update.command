@@ -6,13 +6,14 @@
 # .github/workflows/ci.yml, packed by package-build.sh), backs up the saves,
 # then installs it into the MetalMix folder. Never touches the game itself.
 #
-# Setup: set MM_RELEASE_REPO to "owner/repo", or edit the default below.
+# Downloads from AidanP771/MetalShader. To use a fork, set MM_RELEASE_REPO to
+# "owner/repo" or edit the default below.
 
 cd "$(dirname "$0")" || exit 1
 # shellcheck source=SCRIPTDIR/lib/common.sh
 . ./lib/common.sh
 
-RELEASE_REPO="${MM_RELEASE_REPO:-OWNER/metalmix}"
+RELEASE_REPO="${MM_RELEASE_REPO:-AidanP771/MetalShader}"
 ASSET_URL="https://github.com/$RELEASE_REPO/releases/download/dev-latest/metalmix-dev.tar.gz"
 
 finish() {
@@ -21,10 +22,6 @@ finish() {
     exit "$1"
 }
 
-if [ "$RELEASE_REPO" = "OWNER/metalmix" ]; then
-    mm_warn "Set MM_RELEASE_REPO (or edit this script) to the GitHub repo first."
-    finish 1
-fi
 if mm_game_is_running; then
     mm_warn "Quit The Sims 4 first."
     finish 1

@@ -107,8 +107,8 @@ When you are not both online:
   ```
 
   `mm-update.command` on the test Mac downloads and installs it (after backing
-  up saves). Set `MM_RELEASE_REPO` to `owner/repo` first, for example
-  `AidanP771/MetalShader`. The archive is made by `scripts/package-build.sh`,
+  up saves). It downloads from `AidanP771/MetalShader`; set `MM_RELEASE_REPO`
+  to `owner/repo` to use a fork instead. The archive is made by `scripts/package-build.sh`,
   the same script `deploy.sh` uses, so both routes install identical files.
   The download uses plain `curl`, so it only works while the repo is public.
 - **Reports:** create a private `metalmix-testbench` repo. On the test Mac,
